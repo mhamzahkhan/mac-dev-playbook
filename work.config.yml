@@ -1,0 +1,108 @@
+---
+# Work machine (2024 MacBook Pro, M4 Max / Apple Silicon).
+#
+# Usage on the new machine:
+#   cp work.config.yml config.yml
+#   ansible-playbook main.yml --ask-become-pass
+#
+# config.yml is gitignored upstream, so this file is the tracked source of
+# truth. Copy it rather than editing config.yml directly, and keep machine-only
+# overrides in config.yml.
+
+configure_dotfiles: false
+configure_terminal: false
+configure_osx: true
+configure_dock: false
+configure_sudoers: false
+configure_sublime: false
+
+# Ships in this repo; replaces the ~/.osx that the dotfiles role would
+# otherwise provide.
+osx_script: "{{ playbook_dir }}/files/macos-defaults.sh --no-restart"
+
+post_provision_tasks:
+  - tasks/rosetta.yml
+  - tasks/iterm2.yml
+
+homebrew_taps:
+  - hashicorp/tap
+  - fluxcd/tap
+
+homebrew_installed_packages:
+  # Infrastructure as code and secrets
+  - ansible
+  - ansible-lint
+  - yamllint
+  - markdownlint-cli2
+  - hashicorp/tap/terraform
+  - vault-cli
+  - sops
+
+  # Kubernetes
+  - kubernetes-cli
+  - helm
+  - k9s
+  - stern
+  - kor
+  - velero
+  - fluxcd/tap/flux
+
+  # Cloud and object storage
+  - awscli
+  - minio-mc
+  - harbor-cli
+  - rclone
+
+  # Git
+  - git
+  - gh
+  - glab
+
+  # Networking
+  - nmap
+  - iperf3
+  - wireguard-tools
+  - ipmitool
+
+  # Shell and terminal
+  - tmux
+  - neovim
+  - htop
+  - ncdu
+  - ripgrep
+  - wget
+  - watch
+
+  # Language toolchains
+  - go
+  - node
+  - yarn
+  - pyenv
+  - golangci-lint
+
+homebrew_cask_appdir: /Applications
+homebrew_cask_apps:
+  - iterm2
+  - visual-studio-code
+  - drawio
+  - remote-desktop-manager
+  - obsidian
+  - claude
+  - claude-code
+
+  # Fonts
+  - font-fira-code
+  - font-fira-code-nerd-font
+  - font-fira-mono
+  - font-fira-mono-nerd-font
+  - font-fira-sans
+  - font-ibm-plex-sans
+
+mas_installed_apps: []
+mas_email: ""
+mas_password: ""
+
+composer_packages: []
+gem_packages: []
+npm_packages: []
+pip_packages: []
