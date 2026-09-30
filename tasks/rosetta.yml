@@ -1,0 +1,17 @@
+---
+# Rosetta 2 lets Apple Silicon Macs run x86_64 binaries. Several casks and
+# vendor tools still ship Intel-only builds.
+
+- name: Check whether Rosetta 2 is already installed.
+  ansible.builtin.stat:
+    path: /Library/Apple/usr/share/rosetta/rosetta
+  register: rosetta_binary
+  when: ansible_architecture == "arm64"
+
+- name: Install Rosetta 2.
+  ansible.builtin.command: softwareupdate --install-rosetta --agree-to-license
+  become: true
+  when:
+    - ansible_architecture == "arm64"
+    - not rosetta_binary.stat.exists
+  changed_when: true

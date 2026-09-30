@@ -1,0 +1,62 @@
+---
+# iTerm2 profile and application preferences.
+#
+# The profile is installed as a Dynamic Profile: iTerm2 reads the JSON file at
+# startup and whenever it changes, so no restart is needed. Dynamic profiles
+# are read-only in the iTerm2 GUI -- to change one, edit
+# files/iterm2/work.json and re-run this playbook.
+
+- name: Ensure the iTerm2 DynamicProfiles directory exists.
+  become: false
+  ansible.builtin.file:
+    path: "~/Library/Application Support/iTerm2/DynamicProfiles"
+    state: directory
+    mode: '0755'
+
+- name: Install the Work iTerm2 dynamic profile.
+  become: false
+  ansible.builtin.copy:
+    src: files/iterm2/work.json
+    dest: "~/Library/Application Support/iTerm2/DynamicProfiles/work.json"
+    mode: '0644'
+
+- name: Read the Work profile GUID.
+  become: false
+  ansible.builtin.set_fact:
+    iterm2_work_profile_guid: >-
+      {{ (lookup('file', 'files/iterm2/work.json') | from_json).Profiles[0].Guid }}
+
+- name: Set the Work profile as the default iTerm2 profile.
+  become: false
+  community.general.osx_defaults:
+    domain: com.googlecode.iterm2
+    key: Default Bookmark Guid
+    type: string
+    value: "{{ iterm2_work_profile_guid }}"
+    state: present
+
+- name: Apply iTerm2 application preferences.
+  become: false
+  community.general.osx_defaults:
+    domain: com.googlecode.iterm2
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - key: ApplePressAndHoldEnabled
+      type: bool
+      value: false
+    # Stored as an integer rather than a boolean in this domain.
+    - key: AppleScrollAnimationEnabled
+      type: int
+      value: 0
+    - key: NSScrollAnimationEnabled
+      type: bool
+      value: false
+    - key: HapticFeedbackForEsc
+      type: bool
+      value: false
+    - key: AllowClipboardAccess
+      type: bool
+      value: true
