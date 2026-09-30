@@ -139,6 +139,42 @@ My [dotfiles](https://github.com/geerlingguy/dotfiles) are also installed into t
 
 Finally, there are a few other preferences and settings added on for various apps and services.
 
+## Work machine setup (Apple Silicon)
+
+`work.config.yml` is the tracked configuration for the work MacBook Pro (M4 Max).
+`config.yml` is gitignored upstream, so edit `work.config.yml` and copy it into
+place rather than editing `config.yml` directly:
+
+    ansible-galaxy install -r requirements.yml
+    cp work.config.yml config.yml
+    ansible-playbook main.yml --ask-become-pass
+
+What it configures beyond the upstream defaults:
+
+- **Rosetta 2** (`tasks/rosetta.yml`) - installed only when
+  `ansible_architecture == "arm64"`, skipped on Intel.
+- **iTerm2 profile** (`tasks/iterm2.yml`) - installs `files/iterm2/work.json`
+  as an iTerm2 Dynamic Profile and sets it as the startup profile.
+- **macOS defaults** (`files/macos-defaults.sh`) - replaces the `~/.osx`
+  script that the dotfiles role would otherwise supply. `configure_dotfiles`
+  is off, so the playbook ships its own.
+
+### Editing the iTerm2 profile
+
+Dynamic Profiles are read-only in the iTerm2 GUI; editing the profile there
+creates a separate override instead of changing the file. To make a change
+stick, edit `files/iterm2/work.json` and re-run:
+
+    ansible-playbook main.yml --tags post
+
+iTerm2 reloads Dynamic Profiles as soon as the file changes - no restart needed.
+
+To regenerate the profile from a machine whose iTerm2 is already set up the way
+you want, export the Default profile from
+`~/Library/Preferences/com.googlecode.iterm2.plist`, drop the machine-specific
+keys (`Guid`, `Working Directory`, `NSWindow Frame *`), and give it a fresh
+`Guid`.
+
 ## Full / From-scratch setup guide
 
 Since I've used this playbook to set up something like 20 different Macs, I decided to write up a full 100% from-scratch install for my own reference (everyone's particular install will be slightly different).
